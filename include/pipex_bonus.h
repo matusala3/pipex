@@ -1,12 +1,35 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   pipex.c                                            :+:      :+:    :+:   */
+/*   pipex_bonus.h                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: magebreh <magebreh@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/07/10 13:19:19 by magebreh          #+#    #+#             */
-/*   Updated: 2025/07/10 13:19:20 by magebreh         ###   ########.fr       */
+/*   Created: 2025/07/08 14:47:16 by magebreh          #+#    #+#             */
+/*   Updated: 2025/07/10 13:37:02 by magebreh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#ifndef FT_PIPEX_H
+#define FT_PIPEX_H
+
+#include <stdio.h>
+#include <string.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <sys/stat.h>
+#include "../ft_printf/ft_printf.h"
+
+typedef struct s_pipex {
+    int     here_doc;
+    int     num_cmds;
+    char    *infile;
+    char    *outfile;
+    char    **cmds;
+    char    **envp;
+    char    *limiter;
+}   t_pipex;
+
+
+#endif

@@ -3,6 +3,7 @@
         "*.ejs": "html",
         "time.h": "c",
         "stdio.h": "c",
-        "pipex.h": "c"
+        "pipex.h": "c",
+        "fcntl.h": "c"
     }
 }

@@ -1,0 +1,6 @@
+*.o
+libft.a
+a.out
+infile.txt
+pipex_bonus
+libftprintf

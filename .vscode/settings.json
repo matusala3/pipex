@@ -4,6 +4,7 @@
         "time.h": "c",
         "stdio.h": "c",
         "pipex.h": "c",
-        "fcntl.h": "c"
+        "fcntl.h": "c",
+        "stat.h": "c"
     }
 }

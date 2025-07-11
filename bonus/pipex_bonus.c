@@ -6,7 +6,7 @@
 /*   By: magebreh <magebreh@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 14:47:11 by magebreh          #+#    #+#             */
-/*   Updated: 2025/07/10 21:55:13 by magebreh         ###   ########.fr       */
+/*   Updated: 2025/07/11 16:24:47 by magebreh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,6 +60,12 @@ int parse_arguments(t_pipex *pipex, int argc, char **argv, char **envp)
 	return (0);
 }
 
+int init_here_doc_pipe(t_pipex *pipex)
+{
+	(void) pipex;
+	return 1;
+}
+
 int execute_pipeline(t_pipex *pipex)
 {
 	int i;
@@ -102,7 +108,15 @@ void launch_child(t_pipex *pipex, int i, int prev_fd, int pipe_fd[2])
 	}
 	else
 		dup2(pipe_fd[1], STDOUT_FILENO);
-	execve();
+	char **cmd_args = ft_split(pipex->cmds[i], ' ');
+	char *path = get_command_path(cmd_args[0], pipex->envp);
+	if (!path)
+	{
+		perror("command not found");
+		exit(1);
+	}
+	execve(path, cmd_args, pipex->envp);
+
 }
 
 // void execute_pipeline(t_pipex *pipex)

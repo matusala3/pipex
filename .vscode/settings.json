@@ -5,6 +5,7 @@
         "stdio.h": "c",
         "pipex.h": "c",
         "fcntl.h": "c",
-        "stat.h": "c"
+        "stat.h": "c",
+        "pipex_bonus.h": "c"
     }
 }

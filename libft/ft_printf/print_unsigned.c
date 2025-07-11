@@ -6,26 +6,11 @@
 /*   By: magebreh <magebreh@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/10 12:45:20 by magebreh          #+#    #+#             */
-/*   Updated: 2025/05/10 17:53:00 by magebreh         ###   ########.fr       */
+/*   Updated: 2025/07/11 16:48:33 by magebreh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_printf.h"
-
-static int	count_digits(long n)
-{
-	int	count;
-
-	count = 0;
-	if (n == 0)
-		return (1);
-	while (n)
-	{
-		n /= 10;
-		count++;
-	}
-	return (count);
-}
 
 static char	*ft_utoa(unsigned int n)
 {

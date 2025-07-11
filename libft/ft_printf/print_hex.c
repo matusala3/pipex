@@ -6,24 +6,11 @@
 /*   By: magebreh <magebreh@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/10 12:45:46 by magebreh          #+#    #+#             */
-/*   Updated: 2025/05/12 14:03:52 by magebreh         ###   ########.fr       */
+/*   Updated: 2025/07/11 16:46:16 by magebreh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_printf.h"
-
-static int	count_digits(uintptr_t n)
-{
-	int	count;
-
-	count = 0;
-	while (n)
-	{
-		n /= 16;
-		count++;
-	}
-	return (count);
-}
 
 char	*ft_utoa_hex(uintptr_t n, int is_uppercase)
 {

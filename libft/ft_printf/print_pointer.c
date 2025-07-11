@@ -6,21 +6,11 @@
 /*   By: magebreh <magebreh@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/10 12:45:27 by magebreh          #+#    #+#             */
-/*   Updated: 2025/05/12 14:03:39 by magebreh         ###   ########.fr       */
+/*   Updated: 2025/07/11 16:48:26 by magebreh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_printf.h"
-
-size_t	ft_strlen(const char *s)
-{
-	size_t	len;
-
-	len = 0;
-	while (s[len] != '\0')
-		len++;
-	return (len);
-}
 
 int	print_pointer(va_list *args)
 {

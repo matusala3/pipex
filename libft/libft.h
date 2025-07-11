@@ -6,7 +6,7 @@
 /*   By: magebreh <magebreh@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 14:33:26 by magebreh          #+#    #+#             */
-/*   Updated: 2025/07/11 16:47:49 by magebreh         ###   ########.fr       */
+/*   Updated: 2025/07/11 17:11:32 by magebreh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,27 @@
 
 # include <stdlib.h>
 # include <unistd.h>
+# include <stdarg.h>
+# include <stdint.h>
+
+# ifndef LOWERCASE
+#  define LOWERCASE 0
+# endif
+
+# ifndef UPPERCASE
+#  define UPPERCASE 1
+# endif
+
+# ifndef BUFFER_SIZE
+#  define BUFFER_SIZE 42
+# endif
+
+typedef int	(*t_handler)(va_list *);
+typedef struct s_specifier
+{
+	char		specifier;
+	t_handler	handler;
+}	t_specifier;
 
 typedef struct s_list
 {
@@ -59,15 +80,33 @@ void	ft_striteri(char *s, void (*f)(unsigned int, char*));
 void	ft_putnbr_fd(int n, int fd);
 void	ft_putstr_fd(char *s, int fd);
 char	*ft_itoa(int n);
+int		count_digits(long n);
 t_list	*ft_lstnew(void *content);
-void	ft_lstadd_front(t_list **lst, t_list *new);
+void	ft_lstadd_front(t_list **lst, t_list *newnode);
 int		ft_lstsize(t_list *lst);
 t_list	*ft_lstlast(t_list *lst);
-void	ft_lstadd_back(t_list **lst, t_list *new);
+void	ft_lstadd_back(t_list **lst, t_list *newnode);
 void	ft_lstdelone(t_list *lst, void (*del)(void *));
 void	ft_lstclear(t_list **lst, void (*del)(void *));
 void	ft_lstiter(t_list *lst, void (*f)(void *));
 t_list	*ft_lstmap(t_list *lst, void *(*f)(void *), void (*del)(void *));
-int		count_digits(long n);
+
+/* ft_printf functions */
+int		ft_printf(const char *format, ...);
+int		print_char(va_list *args);
+int		print_string(va_list *args);
+int		print_int(va_list *args);
+int		print_unsigned(va_list *args);
+int		print_hex_upper(va_list *args);
+int		print_hex_lower(va_list *args);
+int		print_pointer(va_list *args);
+char	*ft_utoa_hex(uintptr_t n, int is_uppercase);
+
+/* get_next_line functions */
+char	*get_next_line(int fd);
+char	*ft_extract_line(char *s);
+char	*ft_strjoin_free(char *s1, const char *s2);
+char	*ft_read_to_buffer(int fd, char *leftovers, char *temp_buff);
+void	ft_save_leftovers(char *buffer, char *leftovers);
 
 #endif

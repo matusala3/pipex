@@ -6,11 +6,11 @@
 /*   By: magebreh <magebreh@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/07 15:53:04 by magebreh          #+#    #+#             */
-/*   Updated: 2025/07/11 16:55:12 by magebreh         ###   ########.fr       */
+/*   Updated: 2025/07/11 19:15:57 by magebreh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "get_next_line.h"
+#include "../libft.h"
 
 void	ft_save_leftovers(char *buffer, char *leftovers)
 {

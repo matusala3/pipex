@@ -6,11 +6,11 @@
 /*   By: magebreh <magebreh@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/10 12:45:51 by magebreh          #+#    #+#             */
-/*   Updated: 2025/05/10 17:26:10 by magebreh         ###   ########.fr       */
+/*   Updated: 2025/07/11 19:16:53 by magebreh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ft_printf.h"
+#include "../libft.h"
 
 int	print_char(va_list *args)
 {

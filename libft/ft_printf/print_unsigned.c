@@ -6,11 +6,11 @@
 /*   By: magebreh <magebreh@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/10 12:45:20 by magebreh          #+#    #+#             */
-/*   Updated: 2025/07/11 16:48:33 by magebreh         ###   ########.fr       */
+/*   Updated: 2025/07/11 19:16:58 by magebreh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ft_printf.h"
+#include "../libft.h"
 
 static char	*ft_utoa(unsigned int n)
 {

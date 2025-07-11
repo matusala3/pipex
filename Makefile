@@ -6,7 +6,7 @@
 #    By: magebreh <magebreh@student.hive.fi>        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/07/08 15:10:47 by magebreh          #+#    #+#              #
-#    Updated: 2025/07/11 19:14:02 by magebreh         ###   ########.fr        #
+#    Updated: 2025/07/11 19:34:55 by magebreh         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -52,4 +52,20 @@ fclean: clean
 
 re: fclean all
 
-.PHONY: all clean fclean re
+# Convenience targets for libft
+libft:
+	@$(MAKE) -s -C $(LIBFT_DIR)
+	@echo "✅ libft build complete"
+
+libft-clean:
+	@$(MAKE) -s -C $(LIBFT_DIR) clean
+	@echo "✅ libft cleaned"
+
+libft-re:
+	@$(MAKE) -s -C $(LIBFT_DIR) re
+	@echo "✅ libft rebuilt"
+
+libft-info:
+	@$(MAKE) -s -C $(LIBFT_DIR) info
+
+.PHONY: all clean fclean re libft libft-clean libft-re libft-info

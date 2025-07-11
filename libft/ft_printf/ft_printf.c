@@ -6,11 +6,11 @@
 /*   By: magebreh <magebreh@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/09 10:08:47 by magebreh          #+#    #+#             */
-/*   Updated: 2025/05/12 14:04:54 by magebreh         ###   ########.fr       */
+/*   Updated: 2025/07/11 19:17:16 by magebreh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ft_printf.h"
+#include "../libft.h"
 
 static int	dispatch_specifier(char spec, va_list *args)
 {

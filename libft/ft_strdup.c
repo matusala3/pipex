@@ -6,7 +6,7 @@
 /*   By: magebreh <magebreh@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/19 10:37:29 by magebreh          #+#    #+#             */
-/*   Updated: 2025/04/25 12:26:38 by magebreh         ###   ########.fr       */
+/*   Updated: 2025/07/11 16:52:47 by magebreh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,9 +16,15 @@ char	*ft_strdup(const char *s1)
 {
 	char	*res;
 	size_t	i;
+	size_t	len;
 
 	i = 0;
-	res = malloc(ft_strlen(s1) + 1);
+	len = 0;
+	if (!s1)
+		return (NULL);
+	while (s1[len] != '\0')
+		len++;
+	res = malloc(len + 1);
 	if (!res)
 		return (NULL);
 	while (s1[i])

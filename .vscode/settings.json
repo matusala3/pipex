@@ -6,6 +6,7 @@
         "pipex.h": "c",
         "fcntl.h": "c",
         "stat.h": "c",
-        "pipex_bonus.h": "c"
+        "pipex_bonus.h": "c",
+        "get_next_line.h": "c"
     }
 }

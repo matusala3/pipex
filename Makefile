@@ -6,66 +6,68 @@
 #    By: magebreh <magebreh@student.hive.fi>        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/07/08 15:10:47 by magebreh          #+#    #+#              #
-#    Updated: 2025/07/11 19:34:55 by magebreh         ###   ########.fr        #
+#    Updated: 2025/07/12 22:18:38 by magebreh         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME = pipex
+
 CC = cc
-CFLAGS = -Wall -Wextra -Werror -Iinclude
+CFLAGS = -Wall -Wextra -Werror
+INCLUDES = -Iinclude -I./libft
+
+SRC_DIR = src
+BONUS_DIR = bonus
+OBJ_DIR = obj
+LIBFT_DIR = libft
+
 RM = rm -f
 
-OBJ_DIR = obj
+SRC = ${SRC_DIR}/pipex.c ${SRC_DIR}/utils.c
+BONUS_SRC = ${BONUS_DIR}/pipex_bonus.c ${BONUS_DIR}/utils_bonus.c ${BONUS_DIR}/exec_bonus.c
 
-# Source files
-SRC = src/pipex.c src/parse_args.c src/path_utils.c src/exec.c src/cleanup.c
-
-# Library
-LIBFT_DIR = libft
 LIBFT = $(LIBFT_DIR)/libft.a
 
-OBJ := $(SRC:src/%.c=$(OBJ_DIR)/%.o)
+OBJ := $(SRC:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
+BONUS_OBJ = $(BONUS_SRC:$(BONUS_DIR)/%.c=$(OBJ_DIR)/%.o)
 
-all: $(LIBFT) $(NAME)
+GREEN = \033[0;32m
+YELLOW = \033[0;33m
+RESET = \033[0m
+
+all: $(NAME)
+
+$(NAME): $(LIBFT) $(OBJ)
+	@$(CC) $(CFLAGS) $(OBJ) $(LIBFT) -o $(NAME)
+	@echo "$(GREEN)✅ $(NAME) compiled successfully.$(RESET)"
+
+bonus: $(LIBFT) $(BONUS_OBJ)
+	@$(CC) $(CFLAGS) $(BONUS_OBJ) $(LIBFT) -o $(NAME)
+	@echo "$(GREEN)✅ $(NAME) compiled successfully.$(RESET)"
+
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
+	@mkdir -p $(OBJ_DIR)
+	@$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+	@echo "$(YELLOW) compiling: $<$(RESET)"
+
+$(OBJ_DIR)/%.o: $(BONUS_DIR)/%.c
+	@mkdir -p $(OBJ_DIR)
+	@$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
 $(LIBFT):
 	@$(MAKE) -s -C $(LIBFT_DIR)
-	@echo "Libft with ft_printf and get_next_line compiled."
-
-$(OBJ_DIR)/%.o: src/%.c
-	@mkdir -p $(OBJ_DIR)
-	@$(CC) $(CFLAGS) -c $< -o $@
-
-$(NAME): $(OBJ) $(LIBFT)
-	@$(CC) $(CFLAGS) $(OBJ) -L$(LIBFT_DIR) -lft -o $(NAME)
-	@echo "Executable $(NAME) created."
+	@echo "$(GREEN)✅ Libft compiled."
 
 clean:
 	@$(RM) -r $(OBJ_DIR)
 	@$(MAKE) -s -C $(LIBFT_DIR) clean
-	@echo "Object files cleaned."
+	@echo "$(YELLOW)✅ Object files cleaned."
 
 fclean: clean
 	@$(RM) $(NAME)
 	@$(MAKE) -s -C $(LIBFT_DIR) fclean
-	@echo "All files cleaned."
+	@echo "$(YELLOW)✅ All files cleaned."
 
 re: fclean all
 
-# Convenience targets for libft
-libft:
-	@$(MAKE) -s -C $(LIBFT_DIR)
-	@echo "✅ libft build complete"
-
-libft-clean:
-	@$(MAKE) -s -C $(LIBFT_DIR) clean
-	@echo "✅ libft cleaned"
-
-libft-re:
-	@$(MAKE) -s -C $(LIBFT_DIR) re
-	@echo "✅ libft rebuilt"
-
-libft-info:
-	@$(MAKE) -s -C $(LIBFT_DIR) info
-
-.PHONY: all clean fclean re libft libft-clean libft-re libft-info
+.PHONY: all clean fclean re bonus

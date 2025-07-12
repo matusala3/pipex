@@ -6,55 +6,73 @@
 /*   By: magebreh <magebreh@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/11 13:38:21 by magebreh          #+#    #+#             */
-/*   Updated: 2025/07/11 16:25:49 by magebreh         ###   ########.fr       */
+/*   Updated: 2025/07/12 22:24:31 by magebreh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/pipex_bonus.h"
 
-char *get_path_variable(char **envp)
+void	free_string_array(char **split)
 {
-	int i = 0;
+	int	i;
+
+	if (!split)
+		return ;
+	i = 0;
+	while (split[i])
+	{
+		free(split[i]);
+		i++;
+	}
+	free(split);
+}
+
+char	*get_path_variable(char **envp)
+{
+	int	i;
+
+	i = 0;
 	while (envp[i])
 	{
 		if (ft_strncmp(envp[i], "PATH=", 5) == 0)
-			return envp[i] + 5;
+			return (envp[i] + 5);
 		i++;
 	}
 	return (NULL);
 }
 
-char *get_command_path(char *cmd, char **envp)
+char	*get_command_path(char *cmd, char **envp)
 {
-	int i;
-	char *path_line;
-	char **folders;
-	char *exec_path;
+	char	*path_env;
+	char	**folders;
+	char	*exec_path;
 
-	path_line = get_path_variable(envp);
-	if (!path_line)
+	if (ft_strchr(cmd, '/'))
 	{
 		if (access(cmd, X_OK) == 0)
-			return ft_strdup(cmd);
-		return NULL;
+			return (ft_strdup(cmd));
+		return (NULL);
 	}
-	folders = ft_split(path_line, ':');
-	i = 0;
+	path_env = get_path_variable(envp);
+	if (!path_env)
+	{
+		if (access(cmd, X_OK) == 0)
+			return (ft_strdup(cmd));
+		return (NULL);
+	}
+	folders = ft_split(path_env, ':');
 	exec_path = join_path(folders, cmd);
-	free_split(folders);
+	free_string_array(folders);
 	if (exec_path)
-		return exec_path;
-	free_split(folders);
-	if (access(cmd, X_OK) == 0)
-    	return ft_strdup(cmd);
-	return NULL;
+		return (exec_path);
+	return (NULL);
 }
 
-char *join_path(char **folders, char *cmd)
+char	*join_path(char **folders, char *cmd)
 {
-	int i;
-	char *temp;
-	char *exec_path;
+	int		i;
+	char	*temp;
+	char	*exec_path;
 
 	i = 0;
 	while (folders[i])
@@ -63,10 +81,9 @@ char *join_path(char **folders, char *cmd)
 		exec_path = ft_strjoin(temp, cmd);
 		free(temp);
 		if (access(exec_path, X_OK) == 0)
-			return exec_path;
+			return (exec_path);
 		free(exec_path);
 		i++;
 	}
 	return (NULL);
 }
-

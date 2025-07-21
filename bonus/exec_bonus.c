@@ -6,7 +6,7 @@
 /*   By: magebreh <magebreh@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 22:10:58 by magebreh          #+#    #+#             */
-/*   Updated: 2025/07/12 22:37:23 by magebreh         ###   ########.fr       */
+/*   Updated: 2025/07/15 23:14:10 by magebreh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ void	setup_child_fds(t_pipex *pipex, int i, int prev_fd, int pipe_fd[2])
 	close(prev_fd);
 	if (i == pipex->num_cmds - 1)
 	{
-		fd_out = open(pipex->outfile, O_WRONLY | O_CREAT, 0644);
+		fd_out = open(pipex->outfile, O_WRONLY | O_CREAT | O_TRUNC, 0644);
 		if (fd_out < 0)
 		{
 			perror("Failed to open outfile!");
@@ -51,7 +51,9 @@ void	execute_command(t_pipex *pipex, int i)
 	path = get_command_path(cmd_args[0], pipex->envp);
 	if (!path)
 	{
-		ft_printf("bash: %s: command not found\n", cmd_args[0]);
+		write(STDERR_FILENO, "bash: ", 6);
+		write(STDERR_FILENO, cmd_args[0], ft_strlen(cmd_args[0]));
+		write(STDERR_FILENO, ": command not found\n", 20);
 		free_string_array(cmd_args);
 		exit(127);
 	}
@@ -72,20 +74,42 @@ int	exec_loop(t_pipex *pipex, int fd_in)
 {
 	int	i;
 	int	pipe_fd[2];
+	int	*pids;
+	int	status;
 
+	pids = malloc(sizeof(int) * pipex->num_cmds);
+	if (!pids)
+		return (1);
 	i = 0;
 	while (i < pipex->num_cmds)
 	{
 		if (setup_pipe(pipe_fd, i, pipex->num_cmds) != 0)
+		{
+			free(pids);
 			return (1);
-		if (exec_cmd(pipex, i, fd_in, pipe_fd) != 0)
+		}
+		pids[i] = fork();
+		if (pids[i] < 0)
+		{
+			perror("fork failed");
+			free(pids);
 			return (1);
+		}
+		if (pids[i] == 0)
+			launch_child(pipex, i, fd_in, pipe_fd);
 		close(fd_in);
 		if (i < pipex->num_cmds - 1)
 			close(pipe_fd[1]);
 		fd_in = pipe_fd[0];
 		i++;
 	}
+	i = 0;
+	while (i < pipex->num_cmds)
+	{
+		waitpid(pids[i], &status, 0);
+		i++;
+	}
+	free(pids);
 	return (0);
 }
 

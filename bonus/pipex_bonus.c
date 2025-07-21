@@ -6,7 +6,7 @@
 /*   By: magebreh <magebreh@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 14:47:11 by magebreh          #+#    #+#             */
-/*   Updated: 2025/07/12 22:31:37 by magebreh         ###   ########.fr       */
+/*   Updated: 2025/07/15 22:52:53 by magebreh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,20 +94,5 @@ int	setup_pipe(int *pipe_fd, int cmd_index, int total_cmds)
 			return (1);
 		}
 	}
-	return (0);
-}
-
-int	exec_cmd(t_pipex *pipex, int cmd_index, int fd_in, int *pipe_fd)
-{
-	int	pid;
-
-	pid = fork();
-	if (pid < 0)
-	{
-		perror("fork failed");
-		return (1);
-	}
-	if (pid == 0)
-		launch_child(pipex, cmd_index, fd_in, pipe_fd);
 	return (0);
 }

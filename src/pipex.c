@@ -6,7 +6,7 @@
 /*   By: magebreh <magebreh@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 22:38:25 by magebreh          #+#    #+#             */
-/*   Updated: 2025/07/13 13:37:24 by magebreh         ###   ########.fr       */
+/*   Updated: 2025/07/15 23:13:58 by magebreh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,11 +34,11 @@ int	main(int argc, char **argv, char **envp)
 	}
 	pipex.pipe_fd[0] = pipe_fd[0];
 	pipex.pipe_fd[1] = pipe_fd[1];
-	excute_pipeline(&pipex);
+	execute_pipeline(&pipex);
 	return (0);
 }
 
-void excute_pipeline(t_pipex *pipex)
+void execute_pipeline(t_pipex *pipex)
 {
 	pid_t	pid1;
 	pid_t	pid2;
@@ -66,22 +66,6 @@ void excute_pipeline(t_pipex *pipex)
 	waitpid(pid2, &status, 0);
 }
 
-void child1_redirect(t_pipex *pipex)
-{
-	int fd_in;
-
-	fd_in = open(pipex->infile, O_RDONLY);
-	if (fd_in < 0)
-	{
-		perror("Failed to open infile");
-		exit(EXIT_FAILURE);
-	}
-	dup2(fd_in, STDIN_FILENO);
-	close(fd_in);
-	dup2(pipex->pipe_fd[1], STDOUT_FILENO);
-	close(pipex->pipe_fd[1]);
-}
-
 void child1_process(t_pipex *pipex)
 {
 	char	**cmd_args;
@@ -97,7 +81,9 @@ void child1_process(t_pipex *pipex)
 	cmd_path = get_cmd_path(cmd_args[0], pipex->envp);
 	if (!cmd_path)
 	{
-		ft_printf("Command not found: %s\n", cmd_args[0]);
+		write(STDERR_FILENO, "Command not found: ", 19);
+		write(STDERR_FILENO, cmd_args[0], ft_strlen(cmd_args[0]));
+		write(STDERR_FILENO, "\n", 1);
 		free_string_array(cmd_args);
 		exit(EXIT_FAILURE);
 	}
@@ -108,7 +94,24 @@ void child1_process(t_pipex *pipex)
 	exit(EXIT_FAILURE);
 }
 
-void child2_redirect(t_pipex *pipex)
+void child1_redirect(t_pipex *pipex)
+{
+	int fd_in;
+
+	fd_in = open(pipex->infile, O_RDONLY);
+	if (fd_in < 0)
+	{
+		perror("Failed to open infile");
+		exit(EXIT_FAILURE);
+	}
+	dup2(fd_in, STDIN_FILENO);
+	close(fd_in);
+	dup2(pipex->pipe_fd[1], STDOUT_FILENO);
+	close(pipex->pipe_fd[1]);
+	close(pipex->pipe_fd[0]); // Close unused read end
+}
+
+void child2_process(t_pipex *pipex)
 {
 	char	**cmd_args;
 	char	*cmd_path;
@@ -123,7 +126,9 @@ void child2_redirect(t_pipex *pipex)
 	cmd_path = get_cmd_path(cmd_args[0], pipex->envp);
 	if (!cmd_path)
 	{
-		ft_printf("Command not found: %s\n", cmd_args[0]);
+		write(STDERR_FILENO, "Command not found: ", 19);
+		write(STDERR_FILENO, cmd_args[0], ft_strlen(cmd_args[0]));
+		write(STDERR_FILENO, "\n", 1);
 		free_string_array(cmd_args);
 		exit(EXIT_FAILURE);
 	}
@@ -132,4 +137,21 @@ void child2_redirect(t_pipex *pipex)
 	free_string_array(cmd_args);
 	free(cmd_path);
 	exit(EXIT_FAILURE);
+}
+
+void child2_redirect(t_pipex *pipex)
+{
+	int fd_out;
+
+	fd_out = open(pipex->outfile, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+	if (fd_out < 0)
+	{
+		perror("Failed to open outfile");
+		exit(EXIT_FAILURE);
+	}
+	dup2(fd_out, STDOUT_FILENO);
+	close(fd_out);
+	dup2(pipex->pipe_fd[0], STDIN_FILENO);
+	close(pipex->pipe_fd[0]);
+	close(pipex->pipe_fd[1]); // Close unused write end
 }

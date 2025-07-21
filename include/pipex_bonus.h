@@ -6,7 +6,7 @@
 /*   By: magebreh <magebreh@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 14:47:16 by magebreh          #+#    #+#             */
-/*   Updated: 2025/07/15 22:52:41 by magebreh         ###   ########.fr       */
+/*   Updated: 2025/07/21 15:07:06 by magebreh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,6 @@ typedef struct s_pipex
 int		parse_arguments(t_pipex *pipex, int argc, char **argv, char **envp);
 int		init_here_doc_pipe(t_pipex *pipex);
 int		setup_pipe(int *pipe_fd, int cmd_index, int total_cmds);
-void	setup_child_fds(t_pipex *pipex, int i, int prev_fd, int pipe_fd[2]);
 void	execute_command(t_pipex *pipex, int i);
 void	launch_child(t_pipex *pipex, int i, int prev_fd, int pipe_fd[2]);
 int		exec_loop(t_pipex *pipex, int fd_in);
@@ -44,5 +43,6 @@ char	*get_path_variable(char **envp);
 char	*get_command_path(char *cmd, char **envp);
 char	*join_path(char **folders, char *cmd);
 void	free_string_array(char **split);
+void loop(t_pipex *pipex, int *pids, int fd_in);
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: magebreh <magebreh@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 22:38:25 by magebreh          #+#    #+#             */
-/*   Updated: 2025/07/15 23:13:58 by magebreh         ###   ########.fr       */
+/*   Updated: 2025/07/21 13:05:11 by magebreh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,10 +14,10 @@
 
 int	main(int argc, char **argv, char **envp)
 {
-    t_pipex	pipex;
-    int		pipe_fd[2];
+	t_pipex	pipex;
+	int		pipe_fd[2];
 
-	if(argc != 5)
+	if (argc != 5)
 	{
 		ft_printf("./pipex infile cmd1 cmd2 outfile\n");
 		return (1);
@@ -27,7 +27,7 @@ int	main(int argc, char **argv, char **envp)
 	pipex.cmd1 = argv[2];
 	pipex.cmd2 = argv[3];
 	pipex.envp = envp;
-	if(pipe(pipe_fd) == -1)
+	if (pipe(pipe_fd) == -1)
 	{
 		perror("piping failed!");
 		exit(1);
@@ -38,7 +38,7 @@ int	main(int argc, char **argv, char **envp)
 	return (0);
 }
 
-void execute_pipeline(t_pipex *pipex)
+void	execute_pipeline(t_pipex *pipex)
 {
 	pid_t	pid1;
 	pid_t	pid2;
@@ -66,7 +66,7 @@ void execute_pipeline(t_pipex *pipex)
 	waitpid(pid2, &status, 0);
 }
 
-void child1_process(t_pipex *pipex)
+void	child1_process(t_pipex *pipex)
 {
 	char	**cmd_args;
 	char	*cmd_path;
@@ -94,9 +94,9 @@ void child1_process(t_pipex *pipex)
 	exit(EXIT_FAILURE);
 }
 
-void child1_redirect(t_pipex *pipex)
+void	child1_redirect(t_pipex *pipex)
 {
-	int fd_in;
+	int	fd_in;
 
 	fd_in = open(pipex->infile, O_RDONLY);
 	if (fd_in < 0)
@@ -108,10 +108,10 @@ void child1_redirect(t_pipex *pipex)
 	close(fd_in);
 	dup2(pipex->pipe_fd[1], STDOUT_FILENO);
 	close(pipex->pipe_fd[1]);
-	close(pipex->pipe_fd[0]); // Close unused read end
+	close(pipex->pipe_fd[0]);
 }
 
-void child2_process(t_pipex *pipex)
+void	child2_process(t_pipex *pipex)
 {
 	char	**cmd_args;
 	char	*cmd_path;
@@ -139,9 +139,9 @@ void child2_process(t_pipex *pipex)
 	exit(EXIT_FAILURE);
 }
 
-void child2_redirect(t_pipex *pipex)
+void	child2_redirect(t_pipex *pipex)
 {
-	int fd_out;
+	int	fd_out;
 
 	fd_out = open(pipex->outfile, O_WRONLY | O_CREAT | O_TRUNC, 0644);
 	if (fd_out < 0)
@@ -153,5 +153,5 @@ void child2_redirect(t_pipex *pipex)
 	close(fd_out);
 	dup2(pipex->pipe_fd[0], STDIN_FILENO);
 	close(pipex->pipe_fd[0]);
-	close(pipex->pipe_fd[1]); // Close unused write end
+	close(pipex->pipe_fd[1]);
 }

@@ -6,12 +6,12 @@
 /*   By: magebreh <magebreh@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 22:38:46 by magebreh          #+#    #+#             */
-/*   Updated: 2025/07/15 22:49:24 by magebreh         ###   ########.fr       */
+/*   Updated: 2025/07/21 12:59:38 by magebreh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-# ifndef PIPEX_H
-#  define PIPEX_H
+#ifndef PIPEX_H
+# define PIPEX_H
 
 # include <stdio.h>
 # include <string.h>
@@ -23,9 +23,9 @@
 
 typedef struct s_pipex
 {
-    char	*infile;
+	char	*infile;
 	char	*outfile;
-	char 	*cmd1;
+	char	*cmd1;
 	char	*cmd2;
 	char	**envp;
 	int		pipe_fd[2];

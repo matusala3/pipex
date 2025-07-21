@@ -6,7 +6,7 @@
 /*   By: magebreh <magebreh@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 14:47:11 by magebreh          #+#    #+#             */
-/*   Updated: 2025/07/15 22:52:53 by magebreh         ###   ########.fr       */
+/*   Updated: 2025/07/21 15:09:57 by magebreh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,44 +55,77 @@ int	parse_arguments(t_pipex *pipex, int argc, char **argv, char **envp)
 	return (0);
 }
 
-int	init_here_doc_pipe(t_pipex *pipex)
+int	execute_pipeline(t_pipex *pipex)
 {
-	int		pipe_fd[2];
-	char	*line;
-
-	if (pipe(pipe_fd) < 0)
+	int	fd_in;
+	
+	if (pipex->here_doc == 1)
 	{
-		perror("pipe failed");
-		return (-1);
-	}
-	ft_printf("pipe heredoc> ");
-	line = get_next_line(0);
-	while (line)
-	{
-		if (ft_strncmp(line, pipex->limiter, ft_strlen(pipex->limiter)) == 0
-			&& line[ft_strlen(pipex->limiter)] == '\n')
+		fd_in = init_here_doc_pipe(pipex);
+		if (fd_in < 0)
 		{
-			free(line);
-			break ;
-		}
-		write(pipe_fd[1], line, ft_strlen(line));
-		free(line);
-		ft_printf("pipe heredoc> ");
-		line = get_next_line(0);
-	}
-	close(pipe_fd[1]);
-	return (pipe_fd[0]);
-}
-
-int	setup_pipe(int *pipe_fd, int cmd_index, int total_cmds)
-{
-	if (cmd_index < total_cmds - 1)
-	{
-		if (pipe(pipe_fd) < 0)
-		{
-			perror("pipe failed");
+			perror("here_doc failed");
 			return (1);
 		}
 	}
+	else
+	{
+		fd_in = open(pipex->infile, O_RDONLY);
+		if (fd_in < 0)
+		{
+			perror("infile failed");
+			return (1);
+		}
+	}
+	return (exec_loop(pipex, fd_in));
+}
+
+int	exec_loop(t_pipex *pipex, int fd_in)
+{
+	int	i;
+	int	*pids;
+	int	status;
+	int	pipe_fd[2];
+
+	pids = malloc(sizeof(int) * pipex->num_cmds);
+	if (!pids)
+		return (1);
+	loop(pipex, pids, fd_in, pipe_fd);
+	i = 0;
+	while (i < pipex->num_cmds)
+	{
+		waitpid(pids[i], &status, 0);
+		i++;
+	}
+	free(pids);
 	return (0);
+}
+
+int loop(t_pipex *pipex, int *pids, int fd_in, int pipe_fd[2])
+{
+	int	i;
+
+	i = 0;
+	while (i < pipex->num_cmds)
+	{
+		if (setup_pipe(pipe_fd, i, pipex->num_cmds) != 0)
+		{
+			free(pids);
+			return (1);
+		}
+		pids[i] = fork();
+		if (pids[i] < 0)
+		{
+			perror("fork failed");
+			free(pids);
+			return (1);
+		}
+		if (pids[i] == 0)
+			launch_child(pipex, i, fd_in, pipe_fd);
+		close(fd_in);
+		if (i < pipex->num_cmds - 1)
+			close(pipe_fd[1]);
+		fd_in = pipe_fd[0];
+		i++;
+	}
 }

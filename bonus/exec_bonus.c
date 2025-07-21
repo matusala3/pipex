@@ -6,36 +6,11 @@
 /*   By: magebreh <magebreh@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 22:10:58 by magebreh          #+#    #+#             */
-/*   Updated: 2025/07/15 23:14:10 by magebreh         ###   ########.fr       */
+/*   Updated: 2025/07/21 14:52:01 by magebreh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/pipex_bonus.h"
-
-void	setup_child_fds(t_pipex *pipex, int i, int prev_fd, int pipe_fd[2])
-{
-	int	fd_out;
-
-	dup2(prev_fd, STDIN_FILENO);
-	close(prev_fd);
-	if (i == pipex->num_cmds - 1)
-	{
-		fd_out = open(pipex->outfile, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-		if (fd_out < 0)
-		{
-			perror("Failed to open outfile!");
-			exit(1);
-		}
-		dup2(fd_out, STDOUT_FILENO);
-		close(fd_out);
-	}
-	else
-	{
-		dup2(pipe_fd[1], STDOUT_FILENO);
-		close(pipe_fd[1]);
-		close(pipe_fd[0]);
-	}
-}
 
 void	execute_command(t_pipex *pipex, int i)
 {
@@ -66,74 +41,71 @@ void	execute_command(t_pipex *pipex, int i)
 
 void	launch_child(t_pipex *pipex, int i, int prev_fd, int pipe_fd[2])
 {
-	setup_child_fds(pipex, i, prev_fd, pipe_fd);
-	execute_command(pipex, i);
-}
+	int	fd_out;
 
-int	exec_loop(t_pipex *pipex, int fd_in)
-{
-	int	i;
-	int	pipe_fd[2];
-	int	*pids;
-	int	status;
-
-	pids = malloc(sizeof(int) * pipex->num_cmds);
-	if (!pids)
-		return (1);
-	i = 0;
-	while (i < pipex->num_cmds)
+	dup2(prev_fd, STDIN_FILENO);
+	close(prev_fd);
+	if (i == pipex->num_cmds - 1)
 	{
-		if (setup_pipe(pipe_fd, i, pipex->num_cmds) != 0)
+		fd_out = open(pipex->outfile, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+		if (fd_out < 0)
 		{
-			free(pids);
-			return (1);
+			perror("Failed to open outfile!");
+			exit(1);
 		}
-		pids[i] = fork();
-		if (pids[i] < 0)
-		{
-			perror("fork failed");
-			free(pids);
-			return (1);
-		}
-		if (pids[i] == 0)
-			launch_child(pipex, i, fd_in, pipe_fd);
-		close(fd_in);
-		if (i < pipex->num_cmds - 1)
-			close(pipe_fd[1]);
-		fd_in = pipe_fd[0];
-		i++;
-	}
-	i = 0;
-	while (i < pipex->num_cmds)
-	{
-		waitpid(pids[i], &status, 0);
-		i++;
-	}
-	free(pids);
-	return (0);
-}
-
-int	execute_pipeline(t_pipex *pipex)
-{
-	int	fd_in;
-
-	if (pipex->here_doc == 1)
-	{
-		fd_in = init_here_doc_pipe(pipex);
-		if (fd_in < 0)
-		{
-			perror("here_doc failed");
-			return (1);
-		}
+		dup2(fd_out, STDOUT_FILENO);
+		close(fd_out);
 	}
 	else
 	{
-		fd_in = open(pipex->infile, O_RDONLY);
-		if (fd_in < 0)
+		dup2(pipe_fd[1], STDOUT_FILENO);
+		close(pipe_fd[1]);
+		close(pipe_fd[0]);
+	}
+	execute_command(pipex, i);
+}
+
+int	setup_pipe(int *pipe_fd, int cmd_index, int total_cmds)
+{
+	if (cmd_index < total_cmds - 1)
+	{
+		if (pipe(pipe_fd) < 0)
 		{
-			perror("infile failed");
+			perror("pipe failed");
 			return (1);
 		}
 	}
-	return (exec_loop(pipex, fd_in));
+	return (0);
+}
+
+int	init_here_doc_pipe(t_pipex *pipex)
+{
+	int		pipe_fd[2];
+	char	*line;
+	size_t	limiter_len;
+
+	if (pipe(pipe_fd) < 0)
+	{
+		perror("pipe failed");
+		return (-1);
+	}
+	limiter_len = ft_strlen(pipex->limiter);
+	ft_printf("pipe heredoc> ");
+	line = get_next_line(0);
+	while (line)
+	{
+		if (ft_strlen(line) == limiter_len + 1 
+			&& ft_strncmp(line, pipex->limiter, limiter_len) == 0
+			&& line[ft_strlen(pipex->limiter)] == '\n')
+		{
+			free(line);
+			break ;
+		}
+		write(pipe_fd[1], line, ft_strlen(line));
+		free(line);
+		ft_printf("pipe heredoc> ");
+		line = get_next_line(0);
+	}
+	close(pipe_fd[1]);
+	return (pipe_fd[0]);
 }

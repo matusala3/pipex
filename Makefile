@@ -6,7 +6,7 @@
 #    By: magebreh <magebreh@student.hive.fi>        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/07/08 15:10:47 by magebreh          #+#    #+#              #
-#    Updated: 2025/07/12 22:18:38 by magebreh         ###   ########.fr        #
+#    Updated: 2025/07/23 14:01:20 by magebreh         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -23,8 +23,8 @@ LIBFT_DIR = libft
 
 RM = rm -f
 
-SRC = ${SRC_DIR}/pipex.c ${SRC_DIR}/utils.c
-BONUS_SRC = ${BONUS_DIR}/pipex_bonus.c ${BONUS_DIR}/utils_bonus.c ${BONUS_DIR}/exec_bonus.c
+SRC = ${SRC_DIR}/pipex.c ${SRC_DIR}/utils.c ${SRC_DIR}/helper.c
+BONUS_SRC = ${BONUS_DIR}/pipex_bonus.c ${BONUS_DIR}/utils_bonus.c ${BONUS_DIR}/exec_bonus.c ${BONUS_DIR}/helper_bonus.c
 
 LIBFT = $(LIBFT_DIR)/libft.a
 

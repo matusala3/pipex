@@ -6,11 +6,12 @@
 /*   By: magebreh <magebreh@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/11 13:38:21 by magebreh          #+#    #+#             */
-/*   Updated: 2025/07/12 22:24:31 by magebreh         ###   ########.fr       */
+/*   Updated: 2025/07/23 13:32:50 by magebreh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/pipex_bonus.h"
+#include "pipex_bonus.h"
 
 void	free_string_array(char **split)
 {

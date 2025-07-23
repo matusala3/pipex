@@ -6,7 +6,7 @@
 /*   By: magebreh <magebreh@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 14:47:11 by magebreh          #+#    #+#             */
-/*   Updated: 2025/07/21 15:19:49 by magebreh         ###   ########.fr       */
+/*   Updated: 2025/07/23 13:43:08 by magebreh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,7 +58,7 @@ int	parse_arguments(t_pipex *pipex, int argc, char **argv, char **envp)
 int	execute_pipeline(t_pipex *pipex)
 {
 	int	fd_in;
-	
+
 	if (pipex->here_doc == 1)
 	{
 		fd_in = init_here_doc_pipe(pipex);
@@ -90,7 +90,11 @@ int	exec_loop(t_pipex *pipex, int fd_in)
 	pids = malloc(sizeof(int) * pipex->num_cmds);
 	if (!pids)
 		return (1);
-	loop(pipex, pids, fd_in, pipe_fd);
+	if (loop(pipex, pids, fd_in, pipe_fd) != 0)
+	{
+		free(pids);
+		return (1);
+	}
 	i = 0;
 	while (i < pipex->num_cmds)
 	{
@@ -101,9 +105,10 @@ int	exec_loop(t_pipex *pipex, int fd_in)
 	return (0);
 }
 
-int loop(t_pipex *pipex, int *pids, int fd_in, int pipe_fd[2])
+int	loop(t_pipex *pipex, int *pids, int fd_in, int pipe_fd[2])
 {
 	int	i;
+	int	pid;
 
 	i = 0;
 	while (i < pipex->num_cmds)
@@ -113,19 +118,18 @@ int loop(t_pipex *pipex, int *pids, int fd_in, int pipe_fd[2])
 			free(pids);
 			return (1);
 		}
-		pids[i] = fork();
-		if (pids[i] < 0)
+		pid = create_child(pipex, i, fd_in, pipe_fd);
+		if (pid < 0)
 		{
-			perror("fork failed");
 			free(pids);
 			return (1);
 		}
-		if (pids[i] == 0)
-			launch_child(pipex, i, fd_in, pipe_fd);
+		pids[i] = pid;
 		close(fd_in);
 		if (i < pipex->num_cmds - 1)
 			close(pipe_fd[1]);
 		fd_in = pipe_fd[0];
 		i++;
 	}
+	return (0);
 }

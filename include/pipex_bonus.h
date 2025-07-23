@@ -6,7 +6,7 @@
 /*   By: magebreh <magebreh@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 14:47:16 by magebreh          #+#    #+#             */
-/*   Updated: 2025/07/21 15:07:06 by magebreh         ###   ########.fr       */
+/*   Updated: 2025/07/23 13:41:15 by magebreh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,7 @@ char	*get_path_variable(char **envp);
 char	*get_command_path(char *cmd, char **envp);
 char	*join_path(char **folders, char *cmd);
 void	free_string_array(char **split);
-void loop(t_pipex *pipex, int *pids, int fd_in);
+int		loop(t_pipex *pipex, int *pids, int fd_in, int pipe_fd[2]);
+int		create_child(t_pipex *pipex, int i, int fd_in, int pipe_fd[2]);
 
 #endif

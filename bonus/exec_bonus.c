@@ -6,7 +6,7 @@
 /*   By: magebreh <magebreh@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 22:10:58 by magebreh          #+#    #+#             */
-/*   Updated: 2025/07/21 15:19:49 by magebreh         ###   ########.fr       */
+/*   Updated: 2025/07/23 17:41:56 by magebreh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,10 +18,12 @@ void	execute_command(t_pipex *pipex, int i)
 	char	*path;
 
 	cmd_args = ft_split(pipex->cmds[i], ' ');
-	if (!cmd_args)
+	if (!cmd_args || !cmd_args[0] || cmd_args[0][0] == '\0')
 	{
-		perror("Command is empty or failed to split");
-		exit(1);
+		write(STDERR_FILENO, ": command not found\n", 20);
+		if(cmd_args)
+			free_string_array(cmd_args);
+		exit(127);
 	}
 	path = get_command_path(cmd_args[0], pipex->envp);
 	if (!path)
@@ -65,47 +67,55 @@ void	launch_child(t_pipex *pipex, int i, int prev_fd, int pipe_fd[2])
 	execute_command(pipex, i);
 }
 
-int	setup_pipe(int *pipe_fd, int cmd_index, int total_cmds)
+void	read_heredoc_input(t_pipex *pipex, int write_fd)
 {
-	if (cmd_index < total_cmds - 1)
-	{
-		if (pipe(pipe_fd) < 0)
-		{
-			perror("pipe failed");
-			return (1);
-		}
-	}
-	return (0);
-}
-
-int	init_here_doc_pipe(t_pipex *pipex)
-{
-	int		pipe_fd[2];
 	char	*line;
 	size_t	limiter_len;
 
-	if (pipe(pipe_fd) < 0)
-	{
-		perror("pipe failed");
-		return (-1);
-	}
 	limiter_len = ft_strlen(pipex->limiter);
 	ft_printf("pipe heredoc> ");
 	line = get_next_line(0);
 	while (line)
 	{
-		if (ft_strlen(line) == limiter_len + 1 
+		if (ft_strlen(line) == limiter_len + 1
 			&& ft_strncmp(line, pipex->limiter, limiter_len) == 0
 			&& line[ft_strlen(pipex->limiter)] == '\n')
 		{
 			free(line);
 			break ;
 		}
-		write(pipe_fd[1], line, ft_strlen(line));
+		write(write_fd, line, ft_strlen(line));
 		free(line);
 		ft_printf("pipe heredoc> ");
 		line = get_next_line(0);
 	}
+}
+
+int	init_here_doc_pipe(t_pipex *pipex)
+{
+	int	pipe_fd[2];
+
+	if (pipe(pipe_fd) < 0)
+	{
+		perror("pipe failed");
+		return (-1);
+	}
+	read_heredoc_input(pipex, pipe_fd[1]);
 	close(pipe_fd[1]);
 	return (pipe_fd[0]);
+}
+
+int	create_child(t_pipex *pipex, int i, int fd_in, int pipe_fd[2])
+{
+	int	pid;
+
+	pid = fork();
+	if (pid < 0)
+	{
+		perror("fork failed");
+		return (-1);
+	}
+	if (pid == 0)
+		launch_child(pipex, i, fd_in, pipe_fd);
+	return (pid);
 }

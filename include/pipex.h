@@ -6,7 +6,7 @@
 /*   By: magebreh <magebreh@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 22:38:46 by magebreh          #+#    #+#             */
-/*   Updated: 2025/07/21 12:59:38 by magebreh         ###   ########.fr       */
+/*   Updated: 2025/07/23 18:02:51 by magebreh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,6 @@ void	child2_redirect(t_pipex *pipex);
 void	child1_process(t_pipex *pipex);
 void	child1_redirect(t_pipex *pipex);
 void	child2_process(t_pipex *pipex);
-void	execute_pipeline(t_pipex *pipex);
+int	execute_pipeline(t_pipex *pipex);
 
 #endif

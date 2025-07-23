@@ -6,7 +6,7 @@
 /*   By: magebreh <magebreh@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 22:38:25 by magebreh          #+#    #+#             */
-/*   Updated: 2025/07/23 17:31:26 by magebreh         ###   ########.fr       */
+/*   Updated: 2025/07/23 18:04:15 by magebreh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@ int	main(int argc, char **argv, char **envp)
 {
 	t_pipex	pipex;
 	int		pipe_fd[2];
+	int		exit_status;
 
 	if (argc != 5)
 	{
@@ -34,15 +35,15 @@ int	main(int argc, char **argv, char **envp)
 	}
 	pipex.pipe_fd[0] = pipe_fd[0];
 	pipex.pipe_fd[1] = pipe_fd[1];
-	execute_pipeline(&pipex);
-	return (0);
+	exit_status = execute_pipeline(&pipex);
+	return (exit_status);
 }
 
-void	execute_pipeline(t_pipex *pipex)
+int	execute_pipeline(t_pipex *pipex)
 {
 	pid_t	pid1;
 	pid_t	pid2;
-	int		status;
+	int		status1, status2;
 
 	pid1 = fork();
 	if (pid1 < 0)
@@ -62,8 +63,15 @@ void	execute_pipeline(t_pipex *pipex)
 		child2_process(pipex);
 	close(pipex->pipe_fd[0]);
 	close(pipex->pipe_fd[1]);
-	waitpid(pid1, &status, 0);
-	waitpid(pid2, &status, 0);
+	if (waitpid(pid1, &status1, 0) == -1)
+		perror("waitpid failed for cmd1");
+	if (waitpid(pid2, &status2, 0) == -1)
+		perror("waitpid failed for cmd2");
+	
+	// Return exit status of last command (cmd2)
+	if (WIFEXITED(status2))
+		return (WEXITSTATUS(status2));
+	return (1);
 }
 
 void	child1_process(t_pipex *pipex)
@@ -73,17 +81,18 @@ void	child1_process(t_pipex *pipex)
 
 	child1_redirect(pipex);
 	cmd_args = ft_split(pipex->cmd1, ' ');
-	if (!cmd_args)
+	if (!cmd_args || !cmd_args[0] || cmd_args[0][0] == '\0')
 	{
-		perror("Failed to split command");
-		exit(EXIT_FAILURE);
+		write(STDERR_FILENO, ": command not found\n", 20);
+		if (cmd_args)
+			free_string_array(cmd_args);
+		exit(127);
 	}
 	cmd_path = get_cmd_path(cmd_args[0], pipex->envp);
 	if (!cmd_path)
 	{
-		write(STDERR_FILENO, "Command not found: ", 19);
 		write(STDERR_FILENO, cmd_args[0], ft_strlen(cmd_args[0]));
-		write(STDERR_FILENO, "\n", 1);
+		write(STDERR_FILENO, ": command not found\n", 20);
 		free_string_array(cmd_args);
 		exit(EXIT_FAILURE);
 	}
@@ -104,11 +113,16 @@ void	child1_redirect(t_pipex *pipex)
 		perror("Failed to open infile");
 		exit(EXIT_FAILURE);
 	}
-	dup2(fd_in, STDIN_FILENO);
-	close(fd_in);
-	if(dup2(pipex->pipe_fd[1], STDOUT_FILENO) == -1)
+	if (dup2(fd_in, STDIN_FILENO) == -1)
 	{
-
+		perror("dup2 failed for stdin");
+		exit(EXIT_FAILURE);
+	}
+	close(fd_in);
+	if (dup2(pipex->pipe_fd[1], STDOUT_FILENO) == -1)
+	{
+		perror("dup2 failed for stdout");
+		exit(EXIT_FAILURE);
 	}
 	close(pipex->pipe_fd[1]);
 	close(pipex->pipe_fd[0]);

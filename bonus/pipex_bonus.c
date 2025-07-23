@@ -6,7 +6,7 @@
 /*   By: magebreh <magebreh@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 14:47:11 by magebreh          #+#    #+#             */
-/*   Updated: 2025/07/23 13:43:08 by magebreh         ###   ########.fr       */
+/*   Updated: 2025/07/23 18:03:23 by magebreh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,7 +58,7 @@ int	parse_arguments(t_pipex *pipex, int argc, char **argv, char **envp)
 int	execute_pipeline(t_pipex *pipex)
 {
 	int	fd_in;
-
+	
 	if (pipex->here_doc == 1)
 	{
 		fd_in = init_here_doc_pipe(pipex);
@@ -85,6 +85,7 @@ int	exec_loop(t_pipex *pipex, int fd_in)
 	int	i;
 	int	*pids;
 	int	status;
+	int	final_status = 0;
 	int	pipe_fd[2];
 
 	pids = malloc(sizeof(int) * pipex->num_cmds);
@@ -98,17 +99,25 @@ int	exec_loop(t_pipex *pipex, int fd_in)
 	i = 0;
 	while (i < pipex->num_cmds)
 	{
-		waitpid(pids[i], &status, 0);
+		if (waitpid(pids[i], &status, 0) == -1)
+			perror("waitpid failed");
+		// Keep only the last command's exit status
+		if (i == pipex->num_cmds - 1)
+		{
+			if (WIFEXITED(status))
+				final_status = WEXITSTATUS(status);
+			else
+				final_status = 1;
+		}
 		i++;
 	}
 	free(pids);
-	return (0);
+	return (final_status);
 }
 
-int	loop(t_pipex *pipex, int *pids, int fd_in, int pipe_fd[2])
+int loop(t_pipex *pipex, int *pids, int fd_in, int pipe_fd[2])
 {
 	int	i;
-	int	pid;
 
 	i = 0;
 	while (i < pipex->num_cmds)
@@ -118,13 +127,15 @@ int	loop(t_pipex *pipex, int *pids, int fd_in, int pipe_fd[2])
 			free(pids);
 			return (1);
 		}
-		pid = create_child(pipex, i, fd_in, pipe_fd);
-		if (pid < 0)
+		pids[i] = fork();
+		if (pids[i] < 0)
 		{
+			perror("fork failed");
 			free(pids);
 			return (1);
 		}
-		pids[i] = pid;
+		if (pids[i] == 0)
+			launch_child(pipex, i, fd_in, pipe_fd);
 		close(fd_in);
 		if (i < pipex->num_cmds - 1)
 			close(pipe_fd[1]);

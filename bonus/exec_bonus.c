@@ -6,7 +6,7 @@
 /*   By: magebreh <magebreh@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 22:10:58 by magebreh          #+#    #+#             */
-/*   Updated: 2025/07/23 19:10:52 by magebreh         ###   ########.fr       */
+/*   Updated: 2025/07/24 13:05:17 by magebreh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,31 +79,39 @@ int	setup_pipe(int *pipe_fd, int cmd_index, int total_cmds)
 	return (0);
 }
 
+int	process_heredoc_line(char *line, t_pipex *pipex, int write_fd)
+{
+	size_t	limiter_len;
+
+	limiter_len = ft_strlen(pipex->limiter);
+	if (ft_strlen(line) == limiter_len + 1
+		&& ft_strncmp(line, pipex->limiter, limiter_len) == 0
+		&& line[ft_strlen(pipex->limiter)] == '\n')
+	{
+		free(line);
+		return (1);
+	}
+	write(write_fd, line, ft_strlen(line));
+	free(line);
+	return (0);
+}
+
 int	init_here_doc_pipe(t_pipex *pipex)
 {
 	int		pipe_fd[2];
 	char	*line;
-	size_t	limiter_len;
 
 	if (pipe(pipe_fd) < 0)
 	{
 		perror("pipe failed");
 		return (-1);
 	}
-	limiter_len = ft_strlen(pipex->limiter);
 	ft_printf("pipe heredoc> ");
 	line = get_next_line(0);
 	while (line)
 	{
-		if (ft_strlen(line) == limiter_len + 1 
-			&& ft_strncmp(line, pipex->limiter, limiter_len) == 0
-			&& line[ft_strlen(pipex->limiter)] == '\n')
-		{
-			free(line);
+		if (process_heredoc_line(line, pipex, pipe_fd[1]))
 			break ;
-		}
-		write(pipe_fd[1], line, ft_strlen(line));
-		free(line);
 		ft_printf("pipe heredoc> ");
 		line = get_next_line(0);
 	}

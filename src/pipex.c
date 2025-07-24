@@ -6,7 +6,7 @@
 /*   By: magebreh <magebreh@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 22:38:25 by magebreh          #+#    #+#             */
-/*   Updated: 2025/07/23 19:10:25 by magebreh         ###   ########.fr       */
+/*   Updated: 2025/07/24 13:01:44 by magebreh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,8 +65,6 @@ int	execute_pipeline(t_pipex *pipex)
 	close(pipex->pipe_fd[1]);
 	waitpid(pid1, &status1, 0);
 	waitpid(pid2, &status2, 0);
-	
-	// Return exit status of last command (cmd2)
 	if (WIFEXITED(status2))
 		return (WEXITSTATUS(status2));
 	return (1);

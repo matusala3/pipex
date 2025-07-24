@@ -6,7 +6,7 @@
 /*   By: magebreh <magebreh@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 14:47:11 by magebreh          #+#    #+#             */
-/*   Updated: 2025/07/23 19:10:46 by magebreh         ###   ########.fr       */
+/*   Updated: 2025/07/24 13:36:45 by magebreh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,7 +58,7 @@ int	parse_arguments(t_pipex *pipex, int argc, char **argv, char **envp)
 int	execute_pipeline(t_pipex *pipex)
 {
 	int	fd_in;
-	
+
 	if (pipex->here_doc == 1)
 	{
 		fd_in = init_here_doc_pipe(pipex);
@@ -77,31 +77,21 @@ int	execute_pipeline(t_pipex *pipex)
 			return (1);
 		}
 	}
-	return (exec_loop(pipex, fd_in));
+	return (wait_all(pipex, fd_in));
 }
 
-int	exec_loop(t_pipex *pipex, int fd_in)
+int	wait_for_processes(int *pids, int num_cmds)
 {
 	int	i;
-	int	*pids;
 	int	status;
-	int	final_status = 0;
-	int	pipe_fd[2];
+	int	final_status;
 
-	pids = malloc(sizeof(int) * pipex->num_cmds);
-	if (!pids)
-		return (1);
-	if (loop(pipex, pids, fd_in, pipe_fd) != 0)
-	{
-		free(pids);
-		return (1);
-	}
+	final_status = 0;
 	i = 0;
-	while (i < pipex->num_cmds)
+	while (i < num_cmds)
 	{
 		waitpid(pids[i], &status, 0);
-		// Keep only the last command's exit status
-		if (i == pipex->num_cmds - 1)
+		if (i == num_cmds - 1)
 		{
 			if (WIFEXITED(status))
 				final_status = WEXITSTATUS(status);
@@ -110,11 +100,29 @@ int	exec_loop(t_pipex *pipex, int fd_in)
 		}
 		i++;
 	}
+	return (final_status);
+}
+
+int	wait_all(t_pipex *pipex, int fd_in)
+{
+	int	*pids;
+	int	final_status;
+	int	pipe_fd[2];
+
+	pids = malloc(sizeof(int) * pipex->num_cmds);
+	if (!pids)
+		return (1);
+	if (spawn_all(pipex, pids, fd_in, pipe_fd) != 0)
+	{
+		free(pids);
+		return (1);
+	}
+	final_status = wait_for_processes(pids, pipex->num_cmds);
 	free(pids);
 	return (final_status);
 }
 
-int loop(t_pipex *pipex, int *pids, int fd_in, int pipe_fd[2])
+int	spawn_all(t_pipex *pipex, int *pids, int fd_in, int pipe_fd[2])
 {
 	int	i;
 

@@ -6,7 +6,7 @@
 /*   By: magebreh <magebreh@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 14:47:16 by magebreh          #+#    #+#             */
-/*   Updated: 2025/07/24 13:29:06 by magebreh         ###   ########.fr       */
+/*   Updated: 2025/07/24 13:39:24 by magebreh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,8 @@ typedef struct s_pipex
 	char	**cmds;
 	char	**envp;
 	char	*limiter;
+	int		*pids;		// Store process IDs (avoid malloc in wait_all)
+	int		exit_status;	// Store final exit status
 }	t_pipex;
 
 int		parse_arguments(t_pipex *pipex, int argc, char **argv, char **envp);

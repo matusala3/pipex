@@ -6,7 +6,7 @@
 /*   By: magebreh <magebreh@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 14:47:11 by magebreh          #+#    #+#             */
-/*   Updated: 2025/07/24 13:36:45 by magebreh         ###   ########.fr       */
+/*   Updated: 2025/07/24 13:41:19 by magebreh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,8 +24,8 @@ int	main(int argc, char **argv, char **envp)
 	if (parse_arguments(&pipex, argc, argv, envp) != 0)
 		return (1);
 	if (execute_pipeline(&pipex) != 0)
-		return (2);
-	return (0);
+		return (pipex.exit_status);
+	return (pipex.exit_status);
 }
 
 int	parse_arguments(t_pipex *pipex, int argc, char **argv, char **envp)
@@ -40,6 +40,10 @@ int	parse_arguments(t_pipex *pipex, int argc, char **argv, char **envp)
 	pipex->num_cmds = argc - 3 - pipex->here_doc;
 	pipex->outfile = argv[argc - 1];
 	pipex->envp = envp;
+	pipex->exit_status = 0;
+	pipex->pids = malloc(sizeof(int) * pipex->num_cmds);
+	if (!pipex->pids)
+		return (1);
 	if (pipex->here_doc)
 	{
 		pipex->infile = NULL;
@@ -65,6 +69,7 @@ int	execute_pipeline(t_pipex *pipex)
 		if (fd_in < 0)
 		{
 			perror("here_doc failed");
+			free(pipex->pids);
 			return (1);
 		}
 	}
@@ -74,10 +79,13 @@ int	execute_pipeline(t_pipex *pipex)
 		if (fd_in < 0)
 		{
 			perror("infile failed");
+			free(pipex->pids);
 			return (1);
 		}
 	}
-	return (wait_all(pipex, fd_in));
+	pipex->exit_status = wait_all(pipex, fd_in);
+	free(pipex->pids);
+	return (pipex->exit_status);
 }
 
 int	wait_for_processes(int *pids, int num_cmds)
@@ -105,21 +113,11 @@ int	wait_for_processes(int *pids, int num_cmds)
 
 int	wait_all(t_pipex *pipex, int fd_in)
 {
-	int	*pids;
-	int	final_status;
 	int	pipe_fd[2];
 
-	pids = malloc(sizeof(int) * pipex->num_cmds);
-	if (!pids)
+	if (spawn_all(pipex, pipex->pids, fd_in, pipe_fd) != 0)
 		return (1);
-	if (spawn_all(pipex, pids, fd_in, pipe_fd) != 0)
-	{
-		free(pids);
-		return (1);
-	}
-	final_status = wait_for_processes(pids, pipex->num_cmds);
-	free(pids);
-	return (final_status);
+	return (wait_for_processes(pipex->pids, pipex->num_cmds));
 }
 
 int	spawn_all(t_pipex *pipex, int *pids, int fd_in, int pipe_fd[2])
@@ -130,15 +128,11 @@ int	spawn_all(t_pipex *pipex, int *pids, int fd_in, int pipe_fd[2])
 	while (i < pipex->num_cmds)
 	{
 		if (setup_pipe(pipe_fd, i, pipex->num_cmds) != 0)
-		{
-			free(pids);
 			return (1);
-		}
 		pids[i] = fork();
 		if (pids[i] < 0)
 		{
 			perror("fork failed");
-			free(pids);
 			return (1);
 		}
 		if (pids[i] == 0)

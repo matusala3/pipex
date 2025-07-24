@@ -6,7 +6,7 @@
 /*   By: magebreh <magebreh@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 22:38:25 by magebreh          #+#    #+#             */
-/*   Updated: 2025/07/23 18:04:15 by magebreh         ###   ########.fr       */
+/*   Updated: 2025/07/23 19:10:25 by magebreh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,10 +63,8 @@ int	execute_pipeline(t_pipex *pipex)
 		child2_process(pipex);
 	close(pipex->pipe_fd[0]);
 	close(pipex->pipe_fd[1]);
-	if (waitpid(pid1, &status1, 0) == -1)
-		perror("waitpid failed for cmd1");
-	if (waitpid(pid2, &status2, 0) == -1)
-		perror("waitpid failed for cmd2");
+	waitpid(pid1, &status1, 0);
+	waitpid(pid2, &status2, 0);
 	
 	// Return exit status of last command (cmd2)
 	if (WIFEXITED(status2))
@@ -113,17 +111,9 @@ void	child1_redirect(t_pipex *pipex)
 		perror("Failed to open infile");
 		exit(EXIT_FAILURE);
 	}
-	if (dup2(fd_in, STDIN_FILENO) == -1)
-	{
-		perror("dup2 failed for stdin");
-		exit(EXIT_FAILURE);
-	}
+	dup2(fd_in, STDIN_FILENO);
 	close(fd_in);
-	if (dup2(pipex->pipe_fd[1], STDOUT_FILENO) == -1)
-	{
-		perror("dup2 failed for stdout");
-		exit(EXIT_FAILURE);
-	}
+	dup2(pipex->pipe_fd[1], STDOUT_FILENO);
 	close(pipex->pipe_fd[1]);
 	close(pipex->pipe_fd[0]);
 }

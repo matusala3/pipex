@@ -6,7 +6,7 @@
 /*   By: magebreh <magebreh@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 13:56:38 by magebreh          #+#    #+#             */
-/*   Updated: 2025/07/23 18:04:30 by magebreh         ###   ########.fr       */
+/*   Updated: 2025/07/23 19:10:33 by magebreh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,17 +51,9 @@ void	child2_redirect(t_pipex *pipex)
 		perror("Failed to open outfile");
 		exit(EXIT_FAILURE);
 	}
-	if (dup2(fd_out, STDOUT_FILENO) == -1)
-	{
-		perror("dup2 failed for stdout");
-		exit(EXIT_FAILURE);
-	}
+	dup2(fd_out, STDOUT_FILENO);
 	close(fd_out);
-	if (dup2(pipex->pipe_fd[0], STDIN_FILENO) == -1)
-	{
-		perror("dup2 failed for stdin");
-		exit(EXIT_FAILURE);
-	}
+	dup2(pipex->pipe_fd[0], STDIN_FILENO);
 	close(pipex->pipe_fd[0]);
 	close(pipex->pipe_fd[1]);
 }

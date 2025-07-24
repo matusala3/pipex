@@ -6,7 +6,7 @@
 /*   By: magebreh <magebreh@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 22:10:58 by magebreh          #+#    #+#             */
-/*   Updated: 2025/07/23 18:03:40 by magebreh         ###   ########.fr       */
+/*   Updated: 2025/07/23 19:10:52 by magebreh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,11 +44,7 @@ void	launch_child(t_pipex *pipex, int i, int prev_fd, int pipe_fd[2])
 {
 	int	fd_out;
 
-	if (dup2(prev_fd, STDIN_FILENO) == -1)
-	{
-		perror("dup2 failed for stdin");
-		exit(1);
-	}
+	dup2(prev_fd, STDIN_FILENO);
 	close(prev_fd);
 	if (i == pipex->num_cmds - 1)
 	{
@@ -58,20 +54,12 @@ void	launch_child(t_pipex *pipex, int i, int prev_fd, int pipe_fd[2])
 			perror("Failed to open outfile!");
 			exit(1);
 		}
-		if (dup2(fd_out, STDOUT_FILENO) == -1)
-		{
-			perror("dup2 failed for stdout");
-			exit(1);
-		}
+		dup2(fd_out, STDOUT_FILENO);
 		close(fd_out);
 	}
 	else
 	{
-		if (dup2(pipe_fd[1], STDOUT_FILENO) == -1)
-		{
-			perror("dup2 failed for stdout");
-			exit(1);
-		}
+		dup2(pipe_fd[1], STDOUT_FILENO);
 		close(pipe_fd[1]);
 		close(pipe_fd[0]);
 	}

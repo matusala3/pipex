@@ -6,7 +6,7 @@
 /*   By: magebreh <magebreh@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 14:47:11 by magebreh          #+#    #+#             */
-/*   Updated: 2025/07/23 18:03:23 by magebreh         ###   ########.fr       */
+/*   Updated: 2025/07/23 19:10:46 by magebreh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,8 +99,7 @@ int	exec_loop(t_pipex *pipex, int fd_in)
 	i = 0;
 	while (i < pipex->num_cmds)
 	{
-		if (waitpid(pids[i], &status, 0) == -1)
-			perror("waitpid failed");
+		waitpid(pids[i], &status, 0);
 		// Keep only the last command's exit status
 		if (i == pipex->num_cmds - 1)
 		{

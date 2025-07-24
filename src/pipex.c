@@ -6,7 +6,7 @@
 /*   By: magebreh <magebreh@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 22:38:25 by magebreh          #+#    #+#             */
-/*   Updated: 2025/07/24 13:51:44 by magebreh         ###   ########.fr       */
+/*   Updated: 2025/07/24 17:34:37 by magebreh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,23 @@ int	main(int argc, char **argv, char **envp)
 	return (exit_status);
 }
 
+int	execute_pipeline(t_pipex *pipex)
+{
+	pid_t	pid1;
+	pid_t	pid2;
+	int		status1;
+	int		status2;
+
+	fork_processes(pipex, &pid1, &pid2);
+	close(pipex->pipe_fd[0]);
+	close(pipex->pipe_fd[1]);
+	waitpid(pid1, &status1, 0);
+	waitpid(pid2, &status2, 0);
+	if (WIFEXITED(status2))
+		return (WEXITSTATUS(status2));
+	return (1);
+}
+
 int	fork_processes(t_pipex *pipex, pid_t *pid1, pid_t *pid2)
 {
 	*pid1 = fork();
@@ -58,21 +75,4 @@ int	fork_processes(t_pipex *pipex, pid_t *pid1, pid_t *pid2)
 	if (*pid2 == 0)
 		child2_process(pipex);
 	return (0);
-}
-
-int	execute_pipeline(t_pipex *pipex)
-{
-	pid_t	pid1;
-	pid_t	pid2;
-	int		status1;
-	int		status2;
-
-	fork_processes(pipex, &pid1, &pid2);
-	close(pipex->pipe_fd[0]);
-	close(pipex->pipe_fd[1]);
-	waitpid(pid1, &status1, 0);
-	waitpid(pid2, &status2, 0);
-	if (WIFEXITED(status2))
-		return (WEXITSTATUS(status2));
-	return (1);
 }

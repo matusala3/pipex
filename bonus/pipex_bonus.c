@@ -6,7 +6,7 @@
 /*   By: magebreh <magebreh@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 14:47:11 by magebreh          #+#    #+#             */
-/*   Updated: 2025/07/24 13:41:19 by magebreh         ###   ########.fr       */
+/*   Updated: 2025/07/24 13:47:59 by magebreh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,12 @@ int	main(int argc, char **argv, char **envp)
 		ft_printf("./pipex [here_doc LIMITER] infile cmd1 ... cmdN outfile\n");
 		return (1);
 	}
+	if ((argc < 5 && ft_strncmp(argv[1], "here_doc", 9) != 0)
+		|| (argc < 6 && ft_strncmp(argv[1], "here_doc", 9) == 0))
+	{
+		ft_printf("./pipex [here_doc LIMITER] infile cmd1 ... cmdN outfile\n");
+		return (1);
+	}
 	if (parse_arguments(&pipex, argc, argv, envp) != 0)
 		return (1);
 	if (execute_pipeline(&pipex) != 0)
@@ -30,12 +36,6 @@ int	main(int argc, char **argv, char **envp)
 
 int	parse_arguments(t_pipex *pipex, int argc, char **argv, char **envp)
 {
-	if ((argc < 5 && ft_strncmp(argv[1], "here_doc", 9) != 0)
-		|| (argc < 6 && ft_strncmp(argv[1], "here_doc", 9) == 0))
-	{
-		ft_printf("./pipex [here_doc LIMITER] infile cmd1 ... cmdN outfile\n");
-		return (1);
-	}
 	pipex->here_doc = (ft_strncmp(argv[1], "here_doc", 9) == 0);
 	pipex->num_cmds = argc - 3 - pipex->here_doc;
 	pipex->outfile = argv[argc - 1];
@@ -118,30 +118,4 @@ int	wait_all(t_pipex *pipex, int fd_in)
 	if (spawn_all(pipex, pipex->pids, fd_in, pipe_fd) != 0)
 		return (1);
 	return (wait_for_processes(pipex->pids, pipex->num_cmds));
-}
-
-int	spawn_all(t_pipex *pipex, int *pids, int fd_in, int pipe_fd[2])
-{
-	int	i;
-
-	i = 0;
-	while (i < pipex->num_cmds)
-	{
-		if (setup_pipe(pipe_fd, i, pipex->num_cmds) != 0)
-			return (1);
-		pids[i] = fork();
-		if (pids[i] < 0)
-		{
-			perror("fork failed");
-			return (1);
-		}
-		if (pids[i] == 0)
-			launch_child(pipex, i, fd_in, pipe_fd);
-		close(fd_in);
-		if (i < pipex->num_cmds - 1)
-			close(pipe_fd[1]);
-		fd_in = pipe_fd[0];
-		i++;
-	}
-	return (0);
 }

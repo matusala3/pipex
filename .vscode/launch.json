@@ -1,0 +1,33 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug pipex",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/pipex",
+      "args": [
+        "here_doc",
+        "END",
+        "grep red",
+        "cut -d: -f1",
+        "sort",
+        "uniq -c",
+        "outfile"
+      ],
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "miDebuggerPath": "/usr/bin/gdb",
+      "preLaunchTask": "build pipex"
+    }
+  ]
+}

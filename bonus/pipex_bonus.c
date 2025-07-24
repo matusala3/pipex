@@ -6,7 +6,7 @@
 /*   By: magebreh <magebreh@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/08 14:47:11 by magebreh          #+#    #+#             */
-/*   Updated: 2025/07/24 13:47:59 by magebreh         ###   ########.fr       */
+/*   Updated: 2025/07/24 19:54:15 by magebreh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,9 +78,14 @@ int	execute_pipeline(t_pipex *pipex)
 		fd_in = open(pipex->infile, O_RDONLY);
 		if (fd_in < 0)
 		{
-			perror("infile failed");
-			free(pipex->pids);
-			return (1);
+			perror(pipex->infile);
+			fd_in = open("/dev/null", O_RDONLY);
+			if (fd_in < 0)
+			{
+				perror("/dev/null");
+				free(pipex->pids);
+				return (1);
+			}
 		}
 	}
 	pipex->exit_status = wait_all(pipex, fd_in);

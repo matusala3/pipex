@@ -6,7 +6,7 @@
 /*   By: magebreh <magebreh@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 13:56:38 by magebreh          #+#    #+#             */
-/*   Updated: 2025/07/24 13:51:32 by magebreh         ###   ########.fr       */
+/*   Updated: 2025/07/24 19:53:55 by magebreh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,7 @@ void	child1_redirect(t_pipex *pipex)
 	fd_in = open(pipex->infile, O_RDONLY);
 	if (fd_in < 0)
 	{
-		perror("Failed to open infile");
+		perror(pipex->infile);
 		exit(EXIT_FAILURE);
 	}
 	dup2(fd_in, STDIN_FILENO);
@@ -94,7 +94,7 @@ void	child2_redirect(t_pipex *pipex)
 	fd_out = open(pipex->outfile, O_WRONLY | O_CREAT | O_TRUNC, 0644);
 	if (fd_out < 0)
 	{
-		perror("Failed to open outfile");
+		perror(pipex->outfile);
 		exit(EXIT_FAILURE);
 	}
 	dup2(fd_out, STDOUT_FILENO);

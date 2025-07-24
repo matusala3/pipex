@@ -6,7 +6,7 @@
 /*   By: magebreh <magebreh@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 22:10:58 by magebreh          #+#    #+#             */
-/*   Updated: 2025/07/24 13:05:17 by magebreh         ###   ########.fr       */
+/*   Updated: 2025/07/24 19:54:36 by magebreh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,7 @@ void	launch_child(t_pipex *pipex, int i, int prev_fd, int pipe_fd[2])
 {
 	int	fd_out;
 
+	free(pipex->pids);
 	dup2(prev_fd, STDIN_FILENO);
 	close(prev_fd);
 	if (i == pipex->num_cmds - 1)
@@ -51,7 +52,7 @@ void	launch_child(t_pipex *pipex, int i, int prev_fd, int pipe_fd[2])
 		fd_out = open(pipex->outfile, O_WRONLY | O_CREAT | O_TRUNC, 0644);
 		if (fd_out < 0)
 		{
-			perror("Failed to open outfile!");
+			perror(pipex->outfile);
 			exit(1);
 		}
 		dup2(fd_out, STDOUT_FILENO);
@@ -116,5 +117,7 @@ int	init_here_doc_pipe(t_pipex *pipex)
 		line = get_next_line(0);
 	}
 	close(pipe_fd[1]);
+	if (line)
+		free(line);
 	return (pipe_fd[0]);
 }

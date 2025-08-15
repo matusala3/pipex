@@ -77,14 +77,4 @@ fclean: clean
 
 re: fclean all
 
-info:
-	@echo "📊 Library Statistics:"
-	@echo "   Library: $(NAME)"
-	@if [ -f $(NAME) ]; then \
-		echo "   Size: $$(ls -lh $(NAME) | awk '{print $$5}')"; \
-		echo "   Functions: $$(nm $(NAME) | grep -c ' T ' || echo 0)"; \
-	else \
-		echo "   Library not built yet"; \
-	fi
-
 .PHONY: all bonus clean fclean re info
